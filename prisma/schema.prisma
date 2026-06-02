@@ -1,0 +1,238 @@
+// This is your Prisma schema file,
+// learn more about it in the docs: https://pris.ly/d/prisma-schema
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+// ─── ENUMS ───────────────────────────────────────────────────────────────────
+
+enum Role {
+  ADMIN
+  TEACHER
+  STUDENT
+}
+
+enum Gender {
+  MALE
+  FEMALE
+  OTHER
+}
+
+enum AttendanceStatus {
+  PRESENT
+  ABSENT
+  LATE
+  EXCUSED
+}
+
+enum ExamType {
+  MIDTERM
+  FINAL
+  QUIZ
+  ASSIGNMENT
+  PROJECT
+}
+
+// ─── MODELS ──────────────────────────────────────────────────────────────────
+
+model User {
+  id        String   @id @default(uuid())
+  email     String   @unique
+  password  String
+  role      Role     @default(STUDENT)
+  isActive  Boolean  @default(true)
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  teacher  Teacher?
+  student  Student?
+  files    File[]
+
+  @@map("users")
+}
+
+model Teacher {
+  id           String   @id @default(uuid())
+  userId       String   @unique
+  employeeId   String   @unique
+  firstName    String
+  lastName     String
+  email        String
+  phone        String?
+  gender       Gender
+  dateOfBirth  DateTime?
+  address      String?
+  qualification String?
+  joiningDate  DateTime @default(now())
+  salary       Float?
+  profileImage String?
+  createdAt    DateTime @default(now())
+  updatedAt    DateTime @updatedAt
+
+  user    User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  classes Class[]
+  subjects TeacherSubject[]
+  attendanceRecords Attendance[] @relation("TeacherAttendance")
+
+  @@map("teachers")
+}
+
+model Student {
+  id            String   @id @default(uuid())
+  userId        String   @unique
+  studentId     String   @unique
+  firstName     String
+  lastName      String
+  email         String
+  phone         String?
+  gender        Gender
+  dateOfBirth   DateTime?
+  address       String?
+  parentName    String?
+  parentPhone   String?
+  profileImage  String?
+  classId       String?
+  enrollmentDate DateTime @default(now())
+  createdAt     DateTime @default(now())
+  updatedAt     DateTime @updatedAt
+
+  user        User        @relation(fields: [userId], references: [id], onDelete: Cascade)
+  class       Class?      @relation(fields: [classId], references: [id])
+  attendance  Attendance[]
+  grades      Grade[]
+
+  @@map("students")
+}
+
+model Class {
+  id          String   @id @default(uuid())
+  name        String
+  section     String
+  grade       String
+  teacherId   String?
+  capacity    Int      @default(30)
+  room        String?
+  academicYear String
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+
+  teacher     Teacher?  @relation(fields: [teacherId], references: [id])
+  students    Student[]
+  subjects    ClassSubject[]
+  attendance  Attendance[]
+
+  @@unique([name, section, academicYear])
+  @@map("classes")
+}
+
+model Subject {
+  id          String   @id @default(uuid())
+  name        String   @unique
+  code        String   @unique
+  description String?
+  credits     Int      @default(1)
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+
+  teachers    TeacherSubject[]
+  classes     ClassSubject[]
+  grades      Grade[]
+
+  @@map("subjects")
+}
+
+model TeacherSubject {
+  id        String @id @default(uuid())
+  teacherId String
+  subjectId String
+
+  teacher Teacher @relation(fields: [teacherId], references: [id], onDelete: Cascade)
+  subject Subject @relation(fields: [subjectId], references: [id], onDelete: Cascade)
+
+  @@unique([teacherId, subjectId])
+  @@map("teacher_subjects")
+}
+
+model ClassSubject {
+  id        String @id @default(uuid())
+  classId   String
+  subjectId String
+
+  class   Class   @relation(fields: [classId], references: [id], onDelete: Cascade)
+  subject Subject @relation(fields: [subjectId], references: [id], onDelete: Cascade)
+
+  @@unique([classId, subjectId])
+  @@map("class_subjects")
+}
+
+model Attendance {
+  id        String           @id @default(uuid())
+  studentId String
+  classId   String
+  teacherId String?
+  date      DateTime
+  status    AttendanceStatus @default(PRESENT)
+  remarks   String?
+  createdAt DateTime         @default(now())
+  updatedAt DateTime         @updatedAt
+
+  student Student  @relation(fields: [studentId], references: [id], onDelete: Cascade)
+  class   Class    @relation(fields: [classId], references: [id], onDelete: Cascade)
+  teacher Teacher? @relation("TeacherAttendance", fields: [teacherId], references: [id])
+
+  @@unique([studentId, classId, date])
+  @@map("attendance")
+}
+
+model Grade {
+  id        String   @id @default(uuid())
+  studentId String
+  subjectId String
+  examType  ExamType
+  marks     Float
+  maxMarks  Float
+  grade     String?
+  remarks   String?
+  examDate  DateTime
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  student Student @relation(fields: [studentId], references: [id], onDelete: Cascade)
+  subject Subject @relation(fields: [subjectId], references: [id], onDelete: Cascade)
+
+  @@map("grades")
+}
+
+model File {
+  id           String   @id @default(uuid())
+  userId       String
+  originalName String
+  storedName   String
+  mimeType     String
+  size         Int
+  path         String
+  description  String?
+  createdAt    DateTime @default(now())
+
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@map("files")
+}
+
+model Announcement {
+  id        String   @id @default(uuid())
+  title     String
+  content   String
+  targetRole Role?
+  isActive  Boolean  @default(true)
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@map("announcements")
+}
