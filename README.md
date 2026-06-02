@@ -1,36 +1,102 @@
-This is a [Next.js](https://nextjs.org) project bootstrapped with [`create-next-app`](https://nextjs.org/docs/app/api-reference/cli/create-next-app).
+# School ERP — Frontend
 
-## Getting Started
+A modern school management dashboard built with Next.js 15, TypeScript, and Tailwind CSS.
 
-First, run the development server:
+---
+
+## Tech Stack
+
+- **Next.js 15** — App Router + Turbopack
+- **TypeScript** — strict, zero errors
+- **Tailwind CSS** — custom design system, dark mode
+- **Shadcn / Radix UI** — Dialog, Select, Toast, AlertDialog
+- **TanStack Table** — sorting, filtering, server-side pagination
+- **Recharts** — attendance trend, grade distribution charts
+- **React Hook Form + Zod** — validated forms
+- **Axios** — JWT interceptor, auto-logout on 401
+- **next-themes** — light / dark mode
+
+---
+
+## Setup
+
+### 1. Install dependencies
+
+```bash
+cd frontend
+npm install
+```
+
+### 2. Configure environment
+
+Create `.env.local` in the `frontend/` folder:
+
+```env
+NEXT_PUBLIC_API_URL=http://localhost:5000
+```
+
+### 3. Start the dev server
 
 ```bash
 npm run dev
-# or
-yarn dev
-# or
-pnpm dev
-# or
-bun dev
 ```
 
-Open [http://localhost:3000](http://localhost:3000) with your browser to see the result.
+App runs at → **http://localhost:3000**
 
-You can start editing the page by modifying `app/page.tsx`. The page auto-updates as you edit the file.
+> Make sure the backend is running on port 5000 first.
 
-This project uses [`next/font`](https://nextjs.org/docs/app/building-your-application/optimizing/fonts) to automatically optimize and load [Geist](https://vercel.com/font), a new font family for Vercel.
+---
 
-## Learn More
+## Login Credentials
 
-To learn more about Next.js, take a look at the following resources:
+| Role    | Email                   | Password     |
+|---------|-------------------------|--------------|
+| Admin   | admin@schoolerp.com     | Admin@123    |
+| Teacher | rajesh@schoolerp.com    | Teacher@123  |
+| Student | aarav@school.com        | Student@123  |
 
-- [Next.js Documentation](https://nextjs.org/docs) - learn about Next.js features and API.
-- [Learn Next.js](https://nextjs.org/learn) - an interactive Next.js tutorial.
+Use the **Admin** account to access all features.
 
-You can check out [the Next.js GitHub repository](https://github.com/vercel/next.js) - your feedback and contributions are welcome!
+---
 
-## Deploy on Vercel
+## Pages
 
-The easiest way to deploy your Next.js app is to use the [Vercel Platform](https://vercel.com/new?utm_medium=default-template&filter=next.js&utm_source=create-next-app&utm_campaign=create-next-app-readme) from the creators of Next.js.
+| Route        | Description                                      |
+|--------------|--------------------------------------------------|
+| `/login`     | Login page with demo credentials shown           |
+| `/dashboard` | Stats, attendance chart, grade chart, announcements |
+| `/students`  | Full CRUD — search, sort, paginate, view detail  |
+| `/teachers`  | Full CRUD                                        |
+| `/classes`   | Full CRUD with class teacher assignment          |
+| `/subjects`  | Full CRUD                                        |
+| `/attendance`| Bulk mark attendance by class & date             |
+| `/grades`    | Record & manage student grades                   |
+| `/files`     | Drag-and-drop file upload, download, delete      |
+| `/settings`  | Profile, change password, theme toggle           |
 
-Check out our [Next.js deployment documentation](https://nextjs.org/docs/app/building-your-application/deploying) for more details.
+---
+
+## Folder Structure
+
+```
+frontend/
+├── app/                   Pages (App Router)
+├── components/
+│   ├── layout/            Sidebar, Navbar, DashboardLayout
+│   └── ui/                Button, Input, Badge, Dialog, DataTable, etc.
+├── contexts/              AuthContext (JWT, session)
+├── providers/             ThemeProvider + AuthProvider
+├── services/              One file per API domain
+├── lib/                   axios.ts, utils.ts
+└── types/                 All TypeScript interfaces
+```
+
+---
+
+## Scripts
+
+```bash
+npm run dev      # Start development server
+npm run build    # Production build
+npm run lint     # Run ESLint
+```
